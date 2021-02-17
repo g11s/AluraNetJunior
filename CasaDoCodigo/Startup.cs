@@ -35,6 +35,7 @@ namespace CasaDoCodigo
 
             services.AddTransient<IDataService, DataService>();
             services.AddTransient<IProdutoRepository, ProdutoRepository>();
+            services.AddTransient<ICategoriaRepository, CategoriaRepository>();
             services.AddTransient<IPedidoRepository, PedidoRepository>();
             services.AddTransient<ICadastroRepository, CadastroRepository>();
             services.AddTransient<IItemPedidoRepository, ItemPedidoRepository>();
@@ -64,7 +65,7 @@ namespace CasaDoCodigo
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Pedido}/{action=Carrossel}/{codigo?}");
+                    template: "{controller=Pedido}/{action=BuscaDeProdutos}/{pesquisa?}");
             });
 
             serviceProvider.GetService<IDataService>().InicializaDB().Wait();

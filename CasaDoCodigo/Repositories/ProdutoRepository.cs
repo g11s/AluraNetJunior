@@ -9,22 +9,32 @@ namespace CasaDoCodigo.Repositories
 {
     public class ProdutoRepository : BaseRepository<Produto>, IProdutoRepository
     {
-        public ProdutoRepository(ApplicationContext contexto) : base(contexto)
+        private ICategoriaRepository _categoriaRepository;
+
+        public ProdutoRepository(ApplicationContext contexto, ICategoriaRepository categoriaRepository) : base(contexto)
         {
+            _categoriaRepository = categoriaRepository;
         }
 
         public IList<Produto> GetProdutos()
         {
-            return dbSet.ToList();
+            return dbSet.Include(p => p.Categoria).ToList();
+        }
+
+        public IList<Produto> GetProdutos(string pesquisa)
+        {
+            return dbSet.Include(p => p.Categoria).Where(p => p.Nome.Contains(pesquisa)  || p.Categoria.Nome.Contains(pesquisa) || pesquisa == null).ToList();
         }
 
         public async Task SaveProdutos(List<Livro> livros)
         {
             foreach (var livro in livros)
             {
+                Categoria categoria = await _categoriaRepository.FirstOrCreate(livro.Categoria);
+
                 if (!dbSet.Where(p => p.Codigo == livro.Codigo).Any())
                 {
-                    dbSet.Add(new Produto(livro.Codigo, livro.Nome, livro.Preco));
+                    dbSet.Add(new Produto(livro.Codigo, livro.Nome, livro.Preco, categoria));
                 }
             }
             await contexto.SaveChangesAsync();
